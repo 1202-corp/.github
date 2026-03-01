@@ -1,0 +1,24 @@
+name: Notify modules org to sync issue templates
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/ISSUE_TEMPLATE.yml"
+      - ".github/ISSUE_TEMPLATE/config.yml"
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send repository_dispatch to 1202-modules/.github
+        env:
+          GH_TOKEN: ${{ secrets.MODULES_SYNC_TOKEN }}
+        run: |
+          set -euo pipefail
+          curl -fsSL -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            https://api.github.com/repos/1202-modules/.github/dispatches \
+            -d '{"event_type":"sync-issue-templates","client_payload":{"source_owner":"1202-corp","source_repo":".github","source_ref":"main"}}'
